@@ -65,15 +65,15 @@ router.post("/profile-image", auth, (req, res) => {
     }
 
     try {
-      const imageUrl = `${req.protocol}://${req.get("host")}/uploads/profiles/${req.file.filename}`
+       // Only save the relative path to the database
+    const imageUrl = `/uploads/profiles/${req.file.filename}`
 
-      // Update user's profile image
-      await User.findByIdAndUpdate(req.user.id, { profileImage: imageUrl })
+    await User.findByIdAndUpdate(req.user.id, { profileImage: imageUrl })
 
-      res.json({
+    res.json({
         message: "Profile image uploaded successfully",
-        imageUrl,
-      })
+        imageUrl, // Return the relative path to the frontend
+    })
     } catch (error) {
       console.error("Profile image upload error:", error)
       res.status(500).json({ message: "Server error" })
