@@ -110,8 +110,21 @@ if (process.env.NODE_ENV === 'production') {
 app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true, limit: "10mb" }))
 
-// Static files
-app.use("api/uploads", express.static(path.join(__dirname, "uploads")))
+// Ensure uploads directory exists
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, 'uploads');
+const profilesDir = path.join(uploadsDir, 'profiles');
+
+// Create directories if they don't exist
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+if (!fs.existsSync(profilesDir)) fs.mkdirSync(profilesDir);
+
+// Serve static files with proper headers
+app.use('/api/uploads', express.static(uploadsDir, {
+  setHeaders: (res, path) => {
+    res.set('Cache-Control', 'public, max-age=31536000');
+  }
+}));
 
 // API Routes
 app.use("/api/auth", authRoutes)
