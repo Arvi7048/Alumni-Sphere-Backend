@@ -7,17 +7,30 @@ const { Server } = require("socket.io")
 const path = require("path")
 const dotenv = require("dotenv")
 
-// Load environment variables with explicit path
-// Load environment variables for development only
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
+// Load environment variables
+require('dotenv').config();
+
+// Verify required environment variables
+const requiredEnvVars = [
+  'MONGO_URI',
+  'JWT_SECRET',
+  'NODE_ENV'
+];
+
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error('ERROR: Missing required environment variables:', missingVars.join(', '));
+  process.exit(1);
 }
 
-// Log that environment was loaded successfully
-console.log('Environment variables loaded successfully')
-console.log('NODE_ENV:', process.env.NODE_ENV)
-console.log('EMAIL_SERVICE:', process.env.EMAIL_SERVICE ? 'Set' : 'Not set')
-console.log('ADMIN_EMAIL:', process.env.ADMIN_EMAIL || 'Not set')
+// Log environment info (don't log sensitive data)
+console.log('Environment:');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- Node Version:', process.version);
+console.log('- Database:', process.env.MONGO_URI ? 'Configured' : 'Not configured');
+console.log('- Frontend URL:', process.env.FRONTEND_URL || 'Not set');
+console.log('- Email Service:', process.env.EMAIL_SERVICE || 'Not configured');
 
 const connectDB = require("./config/database")
 const { errorHandler } = require("./middleware/errorHandler")
@@ -98,7 +111,7 @@ app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true, limit: "10mb" }))
 
 // Static files
-app.use("/uploads", express.static(path.join(__dirname, "uploads")))
+app.use("api/uploads", express.static(path.join(__dirname, "uploads")))
 
 // API Routes
 app.use("/api/auth", authRoutes)
