@@ -8,13 +8,9 @@ const path = require("path")
 const dotenv = require("dotenv")
 
 // Load environment variables with explicit path
-const envPath = path.resolve(__dirname, '.env')
-console.log(`Loading environment variables from: ${envPath}`)
-const result = dotenv.config({ path: envPath })
-
-if (result.error) {
-  console.error('Error loading .env file:', result.error)
-  process.exit(1)
+// Load environment variables for development only
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
 }
 
 // Log that environment was loaded successfully
